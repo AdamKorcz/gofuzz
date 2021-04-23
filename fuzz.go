@@ -337,6 +337,14 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 				fc.doFuzz(v.Field(i), 0)
 			}
 		}
+	case reflect.String:
+		str, err := fc.fuzzer.GetGoFuzzString()
+		if err != nil {
+			return
+		}
+		if v.CanSet() {
+            v.SetString(str)
+        }
 	case reflect.Chan:
 		fallthrough
 	case reflect.Func:
@@ -443,7 +451,7 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 	c.fc.doFuzz(v, flagNoCustomFuzz)
 }
 
-func (c Continue) getGoFuzzString() (string, error) {
+func (c Continue) GetGoFuzzString() (string, error) {
 	if c.fc.fuzzer.position >= len(c.fc.fuzzer.data) {
 		return "nil", errors.New("Not enough bytes to create string")
 	}
@@ -459,10 +467,11 @@ func (c Continue) getGoFuzzString() (string, error) {
 // RandString makes a random string up to 20 characters long. The returned string
 // may include a variety of (valid) UTF-8 encodings.
 func (c Continue) RandString() (string, error) {
+	// This part is deterministic with the gofuzz data
 	if c.fc.fuzzer.isGoFuzz {
 		fmt.Println("Here we are")
 		fmt.Println(c.fc.fuzzer.data)
-		randStr, err := c.getGoFuzzString()
+		randStr, err := c.GetGoFuzzString()
 		if err != nil {
 			return "nil", err
 		}
