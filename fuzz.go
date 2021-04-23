@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/google/gofuzz/bytesource"
+	"github.com/AdamKorcz/gofuzz/bytesource"
 	"strings"
 )
 
@@ -39,6 +39,7 @@ type Fuzzer struct {
 	minElements       int
 	maxElements       int
 	maxDepth          int
+	isGoFuzz 		  bool
 	skipFieldPatterns []*regexp.Regexp
 }
 
@@ -89,7 +90,11 @@ func NewWithSeed(seed int64) *Fuzzer {
 // 	return 0
 // }
 func NewFromGoFuzz(data []byte) *Fuzzer {
-	return New().RandSource(bytesource.New(data))
+	fuzzer := New().RandSource(bytesource.New(data))
+	fmt.Println("Our byte input:   ", string(data))
+	fmt.Println("Fuzzers data source: ", fuzzer.r)
+	fuzzer.isGoFuzz = true
+	return 
 }
 
 // Funcs adds each entry in fuzzFuncs as a custom fuzzing function.
@@ -435,18 +440,22 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 
 // RandString makes a random string up to 20 characters long. The returned string
 // may include a variety of (valid) UTF-8 encodings.
-func (c Continue) RandString() string {
-	return randString(c.Rand)
+func (c Continue) RandString() (string, error) {
+	if c.fc.fuzzer.isGoFuzz {
+		// Generate random string
+	} else {
+		return randString(c.Rand)
+	}
 }
 
 // RandUint64 makes random 64 bit numbers.
 // Weirdly, rand doesn't have a function that gives you 64 random bits.
-func (c Continue) RandUint64() uint64 {
+func (c Continue) RandUint64() (uint64, error) {
 	return randUint64(c.Rand)
 }
 
 // RandBool returns true or false randomly.
-func (c Continue) RandBool() bool {
+func (c Continue) RandBool() (bool, error) {
 	return randBool(c.Rand)
 }
 
