@@ -337,6 +337,12 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 				fc.doFuzz(v.Field(i), 0)
 			}
 		}
+	case reflect.Uint64:        
+        newInt, err := fc.fuzzer.GetGoFuzzInt()
+        if err != nil {
+            return err
+        }
+        e.SetUint(uint64(newInt))
 	case reflect.String:
 		str, err := fc.fuzzer.GetGoFuzzString()
 		if err != nil {
@@ -451,6 +457,14 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 	c.fc.doFuzz(v, flagNoCustomFuzz)
 }
 
+func (f *Fuzzer) GetGoFuzzInt() (int, error) {
+	if f.position >= len(f.data) {
+		return 0, errors.New("Not enough bytes to create int")
+	}
+	returnInt := int(f.data[f.position])
+	f.position++
+	return returnInt, nil
+}
 
 // Provides the interface with a Fuzzer
 func (f *Fuzzer) GetGoFuzzString() (string, error) {
