@@ -485,14 +485,14 @@ func (c Continue) GetGoFuzzString() (string, error) {
 func (c Continue) RandString() (string, error) {
 	// This part is deterministic with the gofuzz data
 	if c.fc.fuzzer.isGoFuzz {
-		fmt.Println("Here we are")
-		fmt.Println(c.fc.fuzzer.data)
+		//fmt.Println("Here we are")
+		//fmt.Println(c.fc.fuzzer.data)
 		randStr, err := c.GetGoFuzzString()
 		if err != nil {
 			return "nil", err
 		}
-		fmt.Println("Our created string:")
-		fmt.Println(randStr)
+		//fmt.Println("Our created string:")
+		//fmt.Println(randStr)
 
 		// Generate random string
 	}
