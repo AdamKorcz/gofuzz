@@ -94,7 +94,7 @@ func NewFromGoFuzz(data []byte) *Fuzzer {
 	fmt.Println("Our byte input:   ", string(data))
 	fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
-	return 
+	return fuzzer
 }
 
 // Funcs adds each entry in fuzzFuncs as a custom fuzzing function.
@@ -444,19 +444,19 @@ func (c Continue) RandString() (string, error) {
 	if c.fc.fuzzer.isGoFuzz {
 		// Generate random string
 	} else {
-		return randString(c.Rand)
+		return randString(c.Rand), nil
 	}
 }
 
 // RandUint64 makes random 64 bit numbers.
 // Weirdly, rand doesn't have a function that gives you 64 random bits.
 func (c Continue) RandUint64() (uint64, error) {
-	return randUint64(c.Rand)
+	return randUint64(c.Rand), nil
 }
 
 // RandBool returns true or false randomly.
 func (c Continue) RandBool() (bool, error) {
-	return randBool(c.Rand)
+	return randBool(c.Rand), nil
 }
 
 func fuzzInt(v reflect.Value, r *rand.Rand) {
