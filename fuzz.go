@@ -357,7 +357,7 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 			return
 		}
 		if v.CanSet() {
-            v.SetString(b)
+            v.SetBool(b)
         }
 	case reflect.Chan:
 		fallthrough
