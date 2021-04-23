@@ -342,7 +342,7 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
         if err != nil {
             return
         }
-        e.SetUint(uint64(newInt))
+        v.SetUint(uint64(newInt))
 	case reflect.String:
 		str, err := fc.fuzzer.GetGoFuzzString()
 		if err != nil {
