@@ -451,6 +451,22 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 	c.fc.doFuzz(v, flagNoCustomFuzz)
 }
 
+
+// Provides the interface with a Fuzzer
+func (f *Fuzzer) GetGoFuzzString() (string, error) {
+	if f.position >= len(f.data) {
+		return "nil", errors.New("Not enough bytes to create string")
+	}
+	length := int(f.data[f.position])
+	if f.position+length >= len(f.data) {
+		return "nil", errors.New("Not enough bytes to create string")
+	}
+	str := string(f.data[f.position : f.position+length])
+	f.position = f.position + length
+	return str, nil
+}
+
+// Provides the interface with a Continue
 func (c Continue) GetGoFuzzString() (string, error) {
 	if c.fc.fuzzer.position >= len(c.fc.fuzzer.data) {
 		return "nil", errors.New("Not enough bytes to create string")
