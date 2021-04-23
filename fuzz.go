@@ -464,7 +464,7 @@ func (c Continue) RandString() (string, error) {
 		fmt.Println(c.fc.fuzzer.data)
 		randStr, err := c.getGoFuzzString()
 		if err != nil {
-			return "nil", error
+			return "nil", err
 		}
 
 		// Generate random string
