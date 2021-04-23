@@ -95,8 +95,8 @@ func NewWithSeed(seed int64) *Fuzzer {
 // }
 func NewFromGoFuzz(data []byte) *Fuzzer {
 	fuzzer := New().RandSource(bytesource.New(data))
-	fmt.Println("Our byte input:   ", string(data))
-	fmt.Println("Fuzzers data source: ", fuzzer.r)
+	//fmt.Println("Our byte input:   ", string(data))
+	//fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
 	fuzzer.data = data
 	return fuzzer
