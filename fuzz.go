@@ -466,6 +466,8 @@ func (c Continue) RandString() (string, error) {
 		if err != nil {
 			return "nil", err
 		}
+		fmt.Println("Our created string:")
+		fmt.Println(randStr)
 
 		// Generate random string
 	}
