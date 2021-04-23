@@ -475,7 +475,7 @@ func (f *Fuzzer) GetGoFuzzInt() (int, error) {
 }
 
 func (c Continue) GetGoFuzzBool() (bool, error) {
-	if c.fc.fuzzer.position >= len(f.data) {
+	if c.fc.fuzzer.position >= len(c.fc.fuzzer.data) {
 		return true, errors.New("Not enough bytes to create int")
 	}
 	n := int(c.fc.fuzzer.data[c.fc.fuzzer.position])
