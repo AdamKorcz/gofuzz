@@ -40,6 +40,7 @@ type Fuzzer struct {
 	maxElements       int
 	maxDepth          int
 	isGoFuzz 		  bool
+	goFuzzData 		  []data
 	skipFieldPatterns []*regexp.Regexp
 }
 
@@ -94,6 +95,7 @@ func NewFromGoFuzz(data []byte) *Fuzzer {
 	fmt.Println("Our byte input:   ", string(data))
 	fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
+	fuzzer.goFuzzData = data
 	return fuzzer
 }
 
@@ -442,6 +444,8 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 // may include a variety of (valid) UTF-8 encodings.
 func (c Continue) RandString() (string, error) {
 	if c.fc.fuzzer.isGoFuzz {
+		fmt.Println("Here we are")
+		fmt.Println(c.fx.f.r)
 		// Generate random string
 	}
 	return randString(c.Rand), nil
