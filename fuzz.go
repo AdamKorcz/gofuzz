@@ -445,7 +445,7 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 func (c Continue) RandString() (string, error) {
 	if c.fc.fuzzer.isGoFuzz {
 		fmt.Println("Here we are")
-		fmt.Println(c.fc.f.r)
+		fmt.Println(c.fc.fuzzer.r)
 		// Generate random string
 	}
 	return randString(c.Rand), nil
