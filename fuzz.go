@@ -17,6 +17,7 @@ limitations under the License.
 package fuzz
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -447,7 +448,7 @@ func (c Continue) getGoFuzzString() (string, error) {
 		return "nil", errors.New("Not enough bytes to create string")
 	}
 	length := int(c.fc.fuzzer.data[c.fc.fuzzer.position])
-	if f.position+length >= len(c.fc.fuzzer.data) {
+	if c.fc.fuzzer.position+length >= len(c.fc.fuzzer.data) {
 		return "nil", errors.New("Not enough bytes to create string")
 	}
 	str := string(c.fc.fuzzer.data[c.fc.fuzzer.position : c.fc.fuzzer.position+length])
@@ -463,7 +464,7 @@ func (c Continue) RandString() (string, error) {
 		fmt.Println(c.fc.fuzzer.data)
 		randStr, err := c.getGoFuzzString()
 		if err != nil {
-			return error
+			return "nil", error
 		}
 
 		// Generate random string
