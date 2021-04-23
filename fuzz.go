@@ -351,6 +351,14 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 		if v.CanSet() {
             v.SetString(str)
         }
+	case reflect.Bool:
+		b, err := fc.fuzzer.GetGoFuzzBool()
+		if err != nil {
+			return
+		}
+		if v.CanSet() {
+            v.SetString(b)
+        }
 	case reflect.Chan:
 		fallthrough
 	case reflect.Func:
@@ -464,6 +472,19 @@ func (f *Fuzzer) GetGoFuzzInt() (int, error) {
 	returnInt := int(f.data[f.position])
 	f.position++
 	return returnInt, nil
+}
+
+func (f *Fuzzer) GetGoFuzzBool() (bool, error) {
+	if f.position >= len(f.data) {
+		return 0, errors.New("Not enough bytes to create int")
+	}
+	n := int(f.data[f.position])
+	f.position++
+	if (n % 2) == 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 
 // Provides the interface with a Fuzzer
