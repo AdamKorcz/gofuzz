@@ -40,8 +40,9 @@ type Fuzzer struct {
 	maxElements       int
 	maxDepth          int
 	isGoFuzz 		  bool
-	goFuzzData 		  []byte
+	data 		  	  []byte
 	goFuzzDataPos	  int
+	position		  int
 	skipFieldPatterns []*regexp.Regexp
 }
 
@@ -96,7 +97,7 @@ func NewFromGoFuzz(data []byte) *Fuzzer {
 	fmt.Println("Our byte input:   ", string(data))
 	fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
-	fuzzer.goFuzzData = data
+	fuzzer.data = data
 	return fuzzer
 }
 
