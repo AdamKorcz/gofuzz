@@ -443,9 +443,8 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 func (c Continue) RandString() (string, error) {
 	if c.fc.fuzzer.isGoFuzz {
 		// Generate random string
-	} else {
-		return randString(c.Rand), nil
 	}
+	return randString(c.Rand), nil
 }
 
 // RandUint64 makes random 64 bit numbers.
