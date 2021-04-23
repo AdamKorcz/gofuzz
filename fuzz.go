@@ -41,6 +41,7 @@ type Fuzzer struct {
 	maxDepth          int
 	isGoFuzz 		  bool
 	goFuzzData 		  []byte
+	goFuzzDataPos	  int
 	skipFieldPatterns []*regexp.Regexp
 }
 
@@ -440,12 +441,30 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 	c.fc.doFuzz(v, flagNoCustomFuzz)
 }
 
+func (c Continue) getGoFuzzString() (string, error) {
+	if c.fc.fuzzer.position >= len(c.fc.fuzzer.data) {
+		return "nil", errors.New("Not enough bytes to create string")
+	}
+	length := int(c.fc.fuzzer.data[c.fc.fuzzer.position])
+	if f.position+length >= len(c.fc.fuzzer.data) {
+		return "nil", errors.New("Not enough bytes to create string")
+	}
+	str := string(c.fc.fuzzer.data[c.fc.fuzzer.position : c.fc.fuzzer.position+length])
+	c.fc.fuzzer.position = c.fc.fuzzer.position + length
+	return str, nil
+}
+
 // RandString makes a random string up to 20 characters long. The returned string
 // may include a variety of (valid) UTF-8 encodings.
 func (c Continue) RandString() (string, error) {
 	if c.fc.fuzzer.isGoFuzz {
 		fmt.Println("Here we are")
-		fmt.Println(c.fc.fuzzer.r)
+		fmt.Println(c.fc.fuzzer.data)
+		randStr, err := c.getGoFuzzString()
+		if err != nil {
+			return error
+		}
+
 		// Generate random string
 	}
 	return randString(c.Rand), nil
