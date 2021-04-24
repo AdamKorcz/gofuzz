@@ -102,7 +102,7 @@ func NewFromGoFuzz(data []byte) *Fuzzer {
 	fmt.Println("Our input data:")
 	fmt.Println(string(data))
 	fmt.Println("The bytesource:")
-	fmt.Println(&fuzzer.r)
+	fmt.Println(&fuzzer.r.Reader)
 	return fuzzer
 }
 
