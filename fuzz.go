@@ -99,6 +99,10 @@ func NewFromGoFuzz(data []byte) *Fuzzer {
 	//fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
 	fuzzer.data = data
+	fmt.Println("Our input data:")
+	fmt.Println(string(data))
+	fmt.Println("The bytesource:")
+	fmt.Println(&fuzzer.r)
 	return fuzzer
 }
 
