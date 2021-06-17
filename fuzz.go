@@ -385,17 +385,17 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 	if flags&flagNoCustomFuzz == 0 {
 		// Check for both pointer and non-pointer custom functions.
 		if v.CanAddr() && fc.tryCustom(v.Addr()) {
-			return
+			return nil
 		}
 		if fc.tryCustom(v) {
-			return
+			return nil
 		}
 	}
 
-	if fn, ok := fillFuncMap[v.Kind()]; ok {
+	/*if fn, ok := fillFuncMap[v.Kind()]; ok {
 		fn(v, fc.fuzzer.r)
-		return
-	}
+		return nil
+	}*/
 
 	switch v.Kind() {
 	case reflect.Map:
@@ -406,10 +406,13 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 				key := reflect.New(v.Type().Key()).Elem()
 				fc.doGoFuzz(key, 0)
 				val := reflect.New(v.Type().Elem()).Elem()
-				fc.doGoFuzz(val, 0)
+				err := fc.doGoFuzz(val, 0)
+				if err != nil {
+					return err
+				}
 				v.SetMapIndex(key, val)
 			}
-			return
+			return nil
 		}
 		v.Set(reflect.Zero(v.Type()))
 	case reflect.Ptr:
