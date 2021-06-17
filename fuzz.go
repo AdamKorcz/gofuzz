@@ -581,7 +581,8 @@ func (c Continue) Fuzz(obj interface{}) error {
 	if v.Kind() != reflect.Ptr {
 		panic("needed ptr!")
 	}
-	v = v.Elem()if c.fc.fuzzer.isGoFuzz {
+	v = v.Elem()
+	if c.fc.fuzzer.isGoFuzz {
 		err := c.fc.doGoFuzz(v, 0)
 		if err != nil {
 			return err
