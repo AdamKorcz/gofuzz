@@ -598,6 +598,7 @@ func (c Continue) FuzzNoCustom(obj interface{}) error {
 		panic("needed ptr!")
 	}
 	v = v.Elem()
+	fmt.Println("Should now print 'We are calling FuzzNoCustom with f.isGoFuzz'")
 	if c.fc.fuzzer.isGoFuzz {
 		fmt.Println("We are calling FuzzNoCustom with f.isGoFuzz")
 		err := c.fc.doGoFuzz(v, flagNoCustomFuzz)
