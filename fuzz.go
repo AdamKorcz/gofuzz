@@ -379,7 +379,7 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 
 func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 	if !v.CanSet() {
-		return
+		return nil
 	}
 
 	if flags&flagNoCustomFuzz == 0 {
@@ -422,7 +422,7 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 			if err != nil {
 				return err
 			}
-			return
+			return nil
 		}
 		v.Set(reflect.Zero(v.Type()))
 	case reflect.Slice:
@@ -435,7 +435,7 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 					return err
 				}
 			}
-			return
+			return nil
 		}
 		v.Set(reflect.Zero(v.Type()))
 	case reflect.Array:
@@ -472,7 +472,7 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
 		 reflect.Int64:
 		 newUint, err := fc.fuzzer.GetGoFuzzUint()
         if err != nil {
-            return
+            return nil
         }
         v.SetUint(uint64(newUint))
 	case reflect.Chan:
