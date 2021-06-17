@@ -474,7 +474,8 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
         if err != nil {
             return err
         }
-        v.SetInt(newInt)		
+        v.SetInt(newInt)
+        return nil
 	case reflect.Uint, reflect.Uint8,
 		 reflect.Uint16, reflect.Uint32,
 		 reflect.Uint64, reflect.Uintptr:
@@ -483,7 +484,8 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
             return err
         }
         v.SetUint(newUint)
-    case reflect.String::
+        return nil
+    case reflect.String:
     	newStr, er := fc.fuzzer.GetGoFuzzString()
     	if err != nil {
     		return err
