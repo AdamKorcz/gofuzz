@@ -372,7 +372,7 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 	case reflect.Interface:
 		fallthrough
 	default:
-		panic(fmt.Sprintf("Can't handle %#v", v.Interface()))
+		fmt.Sprintf("Can't handle %#v", v.Interface())
 	}
 }
 
