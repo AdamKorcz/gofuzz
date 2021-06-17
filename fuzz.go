@@ -95,14 +95,8 @@ func NewWithSeed(seed int64) *Fuzzer {
 // }
 func NewFromGoFuzz(data []byte) *Fuzzer {
 	fuzzer := New().RandSource(bytesource.New(data))
-	//fmt.Println("Our byte input:   ", string(data))
-	//fmt.Println("Fuzzers data source: ", fuzzer.r)
 	fuzzer.isGoFuzz = true
 	fuzzer.data = data
-	fmt.Println("Our input data:")
-	fmt.Println(string(data))
-	fmt.Println("The bytesource:")
-	fmt.Println(&fuzzer.r.Reader)
 	return fuzzer
 }
 
@@ -502,7 +496,7 @@ func (c Continue) GetGoFuzzBool() (bool, error) {
 
 func (f *Fuzzer) GetGoFuzzBool() (bool, error) {
 	if f.position >= len(f.data) {
-		return true, errors.New("Not enough bytes to create int")
+		return true, errors.New("Not enough bytes to create bool")
 	}
 	n := int(f.data[f.position])
 	f.position++
@@ -579,6 +573,8 @@ func fuzzInt(v reflect.Value, r *rand.Rand) {
 func fuzzUint(v reflect.Value, r *rand.Rand) {
 	v.SetUint(randUint64(r))
 }
+
+
 
 func fuzzTime(t *time.Time, c Continue) {
 	var sec, nsec int64
