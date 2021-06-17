@@ -242,9 +242,17 @@ const (
 	flagNoCustomFuzz uint64 = 1 << iota
 )
 
-func (f *Fuzzer) fuzzWithContext(v reflect.Value, flags uint64) {
+func (f *Fuzzer) fuzzWithContext(v reflect.Value, flags uint64) error {
 	fc := &fuzzerContext{fuzzer: f}
-	fc.doFuzz(v, flags)
+	if f.isGoFuzz {
+		err := fc.doGoFuzz(v, flags)
+		if err != nil {
+			return err
+		}
+	}else{
+		fc.doFuzz(v, flags)
+	}
+	return nil
 }
 
 // fuzzerContext carries context about a single fuzzing run, which lets Fuzzer
@@ -368,6 +376,114 @@ func (fc *fuzzerContext) doFuzz(v reflect.Value, flags uint64) {
 	}
 }
 
+
+func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
+	if !v.CanSet() {
+		return
+	}
+
+	if flags&flagNoCustomFuzz == 0 {
+		// Check for both pointer and non-pointer custom functions.
+		if v.CanAddr() && fc.tryCustom(v.Addr()) {
+			return
+		}
+		if fc.tryCustom(v) {
+			return
+		}
+	}
+
+	if fn, ok := fillFuncMap[v.Kind()]; ok {
+		fn(v, fc.fuzzer.r)
+		return
+	}
+
+	switch v.Kind() {
+	case reflect.Map:
+		if fc.fuzzer.genShouldFill() {
+			v.Set(reflect.MakeMap(v.Type()))
+			n := fc.fuzzer.genElementCount()
+			for i := 0; i < n; i++ {
+				key := reflect.New(v.Type().Key()).Elem()
+				fc.doGoFuzz(key, 0)
+				val := reflect.New(v.Type().Elem()).Elem()
+				fc.doGoFuzz(val, 0)
+				v.SetMapIndex(key, val)
+			}
+			return
+		}
+		v.Set(reflect.Zero(v.Type()))
+	case reflect.Ptr:
+		if fc.fuzzer.genShouldFill() {
+			v.Set(reflect.New(v.Type().Elem()))
+			err := fc.doGoFuzz(v.Elem(), 0)
+			if err != nil {
+				return err
+			}
+			return
+		}
+		v.Set(reflect.Zero(v.Type()))
+	case reflect.Slice:
+		if fc.fuzzer.genShouldFill() {
+			n := fc.fuzzer.genElementCount()
+			v.Set(reflect.MakeSlice(v.Type(), n, n))
+			for i := 0; i < n; i++ {
+				err := fc.doGoFuzz(v.Index(i), 0)
+				if err != nil {
+					return err
+				}
+			}
+			return
+		}
+		v.Set(reflect.Zero(v.Type()))
+	case reflect.Array:
+		if fc.fuzzer.genShouldFill() {
+			n := v.Len()
+			for i := 0; i < n; i++ {
+				err := fc.doGoFuzz(v.Index(i), 0)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		v.Set(reflect.Zero(v.Type()))
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			skipField := false
+			fieldName := v.Type().Field(i).Name
+			for _, pattern := range fc.fuzzer.skipFieldPatterns {
+				if pattern.MatchString(fieldName) {
+					skipField = true
+					break
+				}
+			}
+			if !skipField {
+				err := fc.doGoFuzz(v.Field(i), 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	case reflect.Int, reflect.Int8,
+		 reflect.Int16, reflect.Int32,
+		 reflect.Int64:
+		 newUint, err := fc.fuzzer.GetGoFuzzUint()
+        if err != nil {
+            return
+        }
+        v.SetUint(uint64(newUint))
+	case reflect.Chan:
+		fallthrough
+	case reflect.Func:
+		fallthrough
+	case reflect.Interface:
+		fallthrough
+	default:
+		panic(fmt.Sprintf("Can't handle %#v", v.Interface()))
+	}
+	return nil
+}
+
 // tryCustom searches for custom handlers, and returns true iff it finds a match
 // and successfully randomizes v.
 func (fc *fuzzerContext) tryCustom(v reflect.Value) bool {
@@ -477,6 +593,23 @@ func (c Continue) GetGoFuzzInt() (int, error) {
 		return 0, errors.New("Not enough bytes to create int")
 	}
 	returnInt := int(c.fc.fuzzer.data[c.fc.fuzzer.position])
+	c.fc.fuzzer.position++
+	return returnInt, nil
+}
+func (f *Fuzzer) GetGoFuzzUint() (int, error) {
+	if f.position >= len(f.data) {
+		return 0, errors.New("Not enough bytes to create int")
+	}
+	returnInt := uint64(f.data[f.position])
+	f.position++
+	return returnInt, nil
+}
+
+func (c Continue) GetGoFuzzUint() (int, error) {
+	if c.fc.fuzzer.position >= len(c.fc.fuzzer.data) {
+		return 0, errors.New("Not enough bytes to create int")
+	}
+	returnInt := uint64(c.fc.fuzzer.data[c.fc.fuzzer.position])
 	c.fc.fuzzer.position++
 	return returnInt, nil
 }
