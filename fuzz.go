@@ -474,7 +474,7 @@ func (fc *fuzzerContext) doGoFuzz(v reflect.Value, flags uint64) error {
         if err != nil {
             return nil
         }
-        v.SetUint(uint64(newUint))
+        v.SetUint(newUint)
 	case reflect.Chan:
 		fallthrough
 	case reflect.Func:
