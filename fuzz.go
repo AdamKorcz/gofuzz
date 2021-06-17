@@ -245,6 +245,7 @@ const (
 func (f *Fuzzer) fuzzWithContext(v reflect.Value, flags uint64) error {
 	fc := &fuzzerContext{fuzzer: f}
 	if f.isGoFuzz {
+		fmt.Println("fuzzWithContext in f.isGoFuzz")
 		err := fc.doGoFuzz(v, flags)
 		if err != nil {
 			return err
