@@ -245,7 +245,6 @@ const (
 func (f *Fuzzer) fuzzWithContext(v reflect.Value, flags uint64) error {
 	fc := &fuzzerContext{fuzzer: f}
 	if f.isGoFuzz {
-		fmt.Println("fuzzWithContext in f.isGoFuzz")
 		err := fc.doGoFuzz(v, flags)
 		if err != nil {
 			return err
@@ -574,7 +573,7 @@ type Continue struct {
 
 // Fuzz continues fuzzing obj. obj must be a pointer or a reflect.Value of a
 // pointer.
-func (c Continue) Fuzz(obj interface{}) {
+func (c Continue) Fuzz(obj interface{}) error {
 	v, ok := obj.(reflect.Value)
 	if !ok {
 		v = reflect.ValueOf(obj)
@@ -582,8 +581,15 @@ func (c Continue) Fuzz(obj interface{}) {
 	if v.Kind() != reflect.Ptr {
 		panic("needed ptr!")
 	}
-	v = v.Elem()
-	c.fc.doFuzz(v, 0)
+	v = v.Elem()if c.fc.fuzzer.isGoFuzz {
+		err := c.fc.doGoFuzz(v, 0)
+		if err != nil {
+			return err
+		}
+	}else{
+		c.fc.doFuzz(v, 0)
+	}
+	return nil
 }
 
 // FuzzNoCustom continues fuzzing obj, except that any custom fuzz function for
