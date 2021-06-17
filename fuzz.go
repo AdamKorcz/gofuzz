@@ -589,7 +589,7 @@ func (c Continue) Fuzz(obj interface{}) {
 // obj's type will not be called and obj will not be tested for fuzz.Interface
 // conformance.  This applies only to obj and not other instances of obj's
 // type.
-func (c Continue) FuzzNoCustom(obj interface{}) {
+func (c Continue) FuzzNoCustom(obj interface{}) error {
 	v, ok := obj.(reflect.Value)
 	if !ok {
 		v = reflect.ValueOf(obj)
@@ -598,7 +598,16 @@ func (c Continue) FuzzNoCustom(obj interface{}) {
 		panic("needed ptr!")
 	}
 	v = v.Elem()
-	c.fc.doFuzz(v, flagNoCustomFuzz)
+	if f.isGoFuzz {
+		fmt.Println("We are calling FuzzNoCustom with f.isGoFuzz")
+		err := fc.doGoFuzz(v, flags)
+		if err != nil {
+			return err
+		}
+	}else{
+		c.fc.doFuzz(v, flagNoCustomFuzz)
+	}
+	return nil
 }
 
 func (f *Fuzzer) GetGoFuzzInt() (int, error) {
